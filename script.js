@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
     var timer = document.getElementById('timer');
     var startButton = document.getElementById('start');
     var resetButton = document.getElementById('reset');
-
+    const uiAudio = new Audio('sound/ui_click.wav');
+    const alarmSound = new Audio('sound/alarm.mp3');
+    const timerEndedEvent = new Event ("timerEnded");
 
     function formatTime(seconds) {
         var mins = Math.floor(seconds / 60);
@@ -18,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startTimer() {
        clearInterval(intervalID);
-
+         uiAudio.play();
        var min = parseInt(userInput.value, 10);
        if (isNaN(min) || min <= 0) {
               alert('Please enter a valid number of minutes greater than 0.');
@@ -30,9 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
         intervalID = setInterval(() => {
             time--;
             timer.textContent = formatTime(time);
-            if (time <= 0) {
+            if (time <= 0) {  
                 clearInterval(intervalID);
-                alert('Time is up!');
+                document.dispatchEvent(timerEndedEvent);
             }
         }, 1000);
     }
@@ -41,7 +43,18 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(intervalID);
         time = 0;
         timer.textContent = '00:00';
+        uiAudio.play();
     }
+
+    document.addEventListener('timerEnded', () => {
+        alarmSound.play();
+        
+        function stopAlarm() {
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+        }
+        resetButton.addEventListener('click', stopAlarm);
+    });
 
     startButton.addEventListener('click', startTimer);
     resetButton.addEventListener('click', resetTimer);
